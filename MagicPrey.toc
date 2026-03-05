@@ -1,0 +1,14 @@
+## Interface: 120001
+## Title: Magic Prey
+## Notes: LDB data source for Prey Hunt tracking
+## Author: NeoTron
+## Version: @project-version@
+## DefaultState: enabled
+## IconTexture: Interface\Icons\Tracking_WildPet
+## X-Category: Combat
+## X-eMail: neotron@gmail.com
+## OptionalDeps: Ace3, LibDataBroker-1.1, LibLogger-1.0
+## SavedVariables: MagicPreyDB
+
+embeds.xml
+MagicPrey.lua
