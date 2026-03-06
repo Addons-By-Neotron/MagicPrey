@@ -7,7 +7,7 @@
 ## IconTexture: Interface\Icons\Tracking_WildPet
 ## X-Category: Combat
 ## X-eMail: neotron@gmail.com
-## OptionalDeps: Ace3, LibDataBroker-1.1, LibLogger-1.0
+## OptionalDeps: Ace3, LibDataBroker-1.1, LibLogger-1.0, LibMagicUtil-1.0
 ## SavedVariables: MagicPreyDB
 
 embeds.xml
