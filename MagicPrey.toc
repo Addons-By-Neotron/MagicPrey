@@ -11,4 +11,5 @@
 ## SavedVariables: MagicPreyDB
 
 embeds.xml
+Locales.xml
 MagicPrey.lua

@@ -16,6 +16,7 @@ General Public License for more details.
 **********************************************************************
 ]]
 
+local L = LibStub("AceLocale-3.0"):GetLocale("MagicPrey")
 local LDB = LibStub("LibDataBroker-1.1")
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 local AceConfigRegistry = LibStub("AceConfig-3.0")
@@ -71,11 +72,11 @@ local defaults = {
 
 -- State display labels (without color)
 local STATE_LABELS = {
-	Cold  = "Cold",
-	Warm  = "Warm",
-	Hot   = "Hot!",
-	Final = "Found!",
-	Away  = "Away",
+	Cold  = L["Cold"],
+	Warm  = L["Warm"],
+	Hot   = L["Hot!"],
+	Final = L["Found!"],
+	Away  = L["Away"],
 }
 
 -- convert color table {r,g,b,a} to hex string
@@ -109,8 +110,8 @@ local dataobj = LDB:NewDataObject("Magic Prey", {
 	type = "data source",
 	icon = DEFAULT_ICON,
 	iconCoords = DEFAULT_ICON_COORDS,
-	label = "Prey",
-	text = "No Hunt",
+	label = L["Prey"],
+	text = L["No Hunt"],
 	OnClick = function(_, button)
 		if button == "LeftButton" then
 			mod:OnLeftClick()
@@ -318,12 +319,12 @@ function mod:UpdateDisplay()
 		else
 			dataobj.text = stateText
 		end
-		dataobj.label = currentQuestName or "Prey"
+		dataobj.label = currentQuestName or L["Prey"]
 		dataobj.icon = currentIcon
 		dataobj.iconCoords = currentIconCoords
 	else
-		dataobj.text = "No Hunt"
-		dataobj.label = "Prey"
+		dataobj.text = L["No Hunt"]
+		dataobj.label = L["Prey"]
 		dataobj.icon = DEFAULT_ICON
 		dataobj.iconCoords = DEFAULT_ICON_COORDS
 		currentIcon = DEFAULT_ICON
@@ -362,21 +363,21 @@ end
 
 -- Tooltip handler
 function mod:OnTooltipShow(tooltip)
-	tooltip:AddLine(currentQuestName or "Prey Hunt", 1, 1, 1)
+	tooltip:AddLine(currentQuestName or L["Prey Hunt"], 1, 1, 1)
 
 	if currentState then
 		local c = self.db and self.db.profile.colors[currentState] or { 1, 1, 1, 1 }
 		if currentState == "Away" then
 			if currentHuntZone then
-				tooltip:AddLine(fmt("Hunt active in %s", currentHuntZone), c[1], c[2], c[3])
+				tooltip:AddLine(fmt(L["Hunt active in %s"], currentHuntZone), c[1], c[2], c[3])
 			else
-				tooltip:AddLine("Hunt active - not in hunt zone", c[1], c[2], c[3])
+				tooltip:AddLine(L["Hunt active - not in hunt zone"], c[1], c[2], c[3])
 			end
 		else
-			tooltip:AddLine(fmt("State: %s", currentState), c[1], c[2], c[3])
+			tooltip:AddLine(fmt(L["State: %s"], currentState), c[1], c[2], c[3])
 		end
 	else
-		tooltip:AddLine("No active prey hunt", 0.5, 0.5, 0.5)
+		tooltip:AddLine(L["No active prey hunt"], 0.5, 0.5, 0.5)
 	end
 
 	if tooltipText and tooltipText ~= "" then
@@ -420,8 +421,8 @@ function mod:OnTooltipShow(tooltip)
 	end
 
 	tooltip:AddLine(" ")
-	tooltip:AddLine("Left-click: Open World Map", 0.5, 0.5, 0.5)
-	tooltip:AddLine("Right-click: Options", 0.5, 0.5, 0.5)
+	tooltip:AddLine(L["Left-click: Open World Map"], 0.5, 0.5, 0.5)
+	tooltip:AddLine(L["Right-click: Options"], 0.5, 0.5, 0.5)
 end
 
 -- Hide/show Blizzard's built-in prey tracker widget
@@ -495,18 +496,18 @@ local options = {}
 local function BuildOptions()
 	options.general = {
 		type = "group",
-		name = "Magic Prey",
+		name = L["Magic Prey"],
 		args = {
 			ldbNote = {
 				type = "description",
-				name = "Magic Prey is a LibDataBroker data source. It requires an LDB display addon such as Button Bin, ChocolateBar, or Titan Panel to show hunt status.",
+				name = L["Magic Prey is a LibDataBroker data source. It requires an LDB display addon such as Button Bin, ChocolateBar, or Titan Panel to show hunt status."],
 				order = 0,
 				fontSize = "medium",
 			},
 			hideBlizzardTracker = {
 				type = "toggle",
-				name = "Hide built-in prey tracker",
-				desc = "Hide the Blizzard prey tracker crystal widget from the top of the screen.",
+				name = L["Hide built-in prey tracker"],
+				desc = L["Hide the Blizzard prey tracker crystal widget from the top of the screen."],
 				width = "full",
 				order = 1,
 				get = function() return mod.db.profile.hideBlizzardTracker end,
@@ -520,17 +521,17 @@ local function BuildOptions()
 
 	options.colors = {
 		type = "group",
-		name = "Colors",
+		name = L["Colors"],
 		args = {
 			desc = {
 				type = "description",
-				name = "Customize the colors used for each hunt state in the LDB display and tooltip.",
+				name = L["Customize the colors used for each hunt state in the LDB display and tooltip."],
 				order = 0,
 			},
 			Cold = {
 				type = "color",
-				name = "Cold",
-				desc = "Color for the Cold hunt state.",
+				name = L["Cold"],
+				desc = L["Color for the Cold hunt state."],
 				hasAlpha = true,
 				order = 1,
 				get = function()
@@ -544,8 +545,8 @@ local function BuildOptions()
 			},
 			Warm = {
 				type = "color",
-				name = "Warm",
-				desc = "Color for the Warm hunt state.",
+				name = L["Warm"],
+				desc = L["Color for the Warm hunt state."],
 				hasAlpha = true,
 				order = 2,
 				get = function()
@@ -559,8 +560,8 @@ local function BuildOptions()
 			},
 			Hot = {
 				type = "color",
-				name = "Hot",
-				desc = "Color for the Hot hunt state.",
+				name = L["Hot!"],
+				desc = L["Color for the Hot hunt state."],
 				hasAlpha = true,
 				order = 3,
 				get = function()
@@ -574,8 +575,8 @@ local function BuildOptions()
 			},
 			Final = {
 				type = "color",
-				name = "Found",
-				desc = "Color for the Found/Final hunt state.",
+				name = L["Found"],
+				desc = L["Color for the Found/Final hunt state."],
 				hasAlpha = true,
 				order = 4,
 				get = function()
@@ -589,8 +590,8 @@ local function BuildOptions()
 			},
 			Away = {
 				type = "color",
-				name = "Away",
-				desc = "Color shown when you have an active hunt but are not in the hunt zone.",
+				name = L["Away"],
+				desc = L["Color shown when you have an active hunt but are not in the hunt zone."],
 				hasAlpha = true,
 				order = 5,
 				get = function()
@@ -619,8 +620,8 @@ function mod:OnInitialize()
 
 	-- Register parent category, then subcategories
 	self.optionsMain = self:OptReg("Magic Prey", options.general)
-	self:OptReg(": Colors", options.colors, "Colors")
-	self.optionsEnd = self:OptReg(": Profiles", options.profiles, "Profiles")
+	self:OptReg(": Colors", options.colors, L["Colors"])
+	self.optionsEnd = self:OptReg(": Profiles", options.profiles, L["Profiles"])
 end
 
 function mod:OnEnable()
