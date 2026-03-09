@@ -18,6 +18,7 @@ General Public License for more details.
 
 local L = LibStub("AceLocale-3.0"):GetLocale("MagicPrey")
 local LDB = LibStub("LibDataBroker-1.1")
+local LDBIcon = LibStub("LibDBIcon-1.0", true)
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 local AceConfigRegistry = LibStub("AceConfig-3.0")
 
@@ -63,6 +64,7 @@ local defaults = {
 			Away  = { 0.6, 0.6, 0.6, 1 },
 		},
 		hideBlizzardTracker = false,
+		minimapIcon = { hide = false },
 	},
 	char = {
 		lastHuntQuestID = nil,
@@ -152,8 +154,7 @@ end
 -- Only called out of combat; results cached until hunt ends
 
 function mod:ScanPreyModifiers()
-	if InCombatLockdown() then return end
-	if IsInInstance() then return end
+	if InCombatLockdown() or IsInInstance() then return end
 
 	preyModifiers = {}
 	if not currentQuestID then return end
@@ -475,6 +476,9 @@ end
 -- Profile change handler
 function mod:ApplySettings()
 	self:ApplyBlizzardTrackerVisibility()
+	if LDBIcon then
+		LDBIcon:Refresh("Magic Prey", self.db.profile.minimapIcon)
+	end
 	self:UpdateDisplay()
 end
 
@@ -500,16 +504,37 @@ local function BuildOptions()
 		args = {
 			ldbNote = {
 				type = "description",
-				name = L["Magic Prey is a LibDataBroker data source. It requires an LDB display addon such as Button Bin, ChocolateBar, or Titan Panel to show hunt status."],
+				name = function()
+					if LDBIcon then
+						return L["Magic Prey displays hunt status on the minimap button and any LibDataBroker display addon such as Button Bin, ChocolateBar, or Titan Panel."]
+					else
+						return L["Magic Prey is a LibDataBroker data source. It requires an LDB display addon such as Button Bin, ChocolateBar, or Titan Panel to show hunt status."]
+					end
+				end,
 				order = 0,
 				fontSize = "medium",
+			},
+			hideMinimapButton = {
+				type = "toggle",
+				name = L["Hide minimap button"],
+				desc = L["Hide the minimap button. The addon is still accessible via LDB display addons."],
+				width = "full",
+				order = 1,
+				get = function() return mod.db.profile.minimapIcon.hide end,
+				set = function(_, val)
+					mod.db.profile.minimapIcon.hide = val
+					if LDBIcon then
+						LDBIcon:Refresh("Magic Prey", mod.db.profile.minimapIcon)
+					end
+				end,
+				hidden = function() return not LDBIcon end,
 			},
 			hideBlizzardTracker = {
 				type = "toggle",
 				name = L["Hide built-in prey tracker"],
 				desc = L["Hide the Blizzard prey tracker crystal widget from the top of the screen."],
 				width = "full",
-				order = 1,
+				order = 2,
 				get = function() return mod.db.profile.hideBlizzardTracker end,
 				set = function(_, val)
 					mod.db.profile.hideBlizzardTracker = val
@@ -616,6 +641,10 @@ function mod:OnInitialize()
 	self.db.RegisterCallback(self, "OnProfileCopied", "ApplySettings")
 	self.db.RegisterCallback(self, "OnProfileReset", "ApplySettings")
 	self:SetLogLevel(self.logLevels.DEBUG)
+	if LDBIcon then
+		LDBIcon:Register("Magic Prey", dataobj, self.db.profile.minimapIcon)
+	end
+
 	BuildOptions()
 
 	-- Register parent category, then subcategories
@@ -694,9 +723,7 @@ function mod:PLAYER_REGEN_ENABLED()
 end
 
 function mod:UNIT_AURA(_, unit)
-	if unit ~= "player" then return end
-	if not currentQuestID then return end
-	if InCombatLockdown() then return end
+	if unit ~= "player" or not currentQuestID or InCombatLockdown() then return end
 	self:ScanPreyModifiers()
 end
 

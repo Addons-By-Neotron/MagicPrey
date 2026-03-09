@@ -19,6 +19,9 @@ L["Prey"] = true
 -- Options: General
 L["Magic Prey"] = true
 L["Magic Prey is a LibDataBroker data source. It requires an LDB display addon such as Button Bin, ChocolateBar, or Titan Panel to show hunt status."] = true
+L["Magic Prey displays hunt status on the minimap button and any LibDataBroker display addon such as Button Bin, ChocolateBar, or Titan Panel."] = true
+L["Hide minimap button"] = true
+L["Hide the minimap button. The addon is still accessible via LDB display addons."] = true
 L["Hide built-in prey tracker"] = true
 L["Hide the Blizzard prey tracker crystal widget from the top of the screen."] = true
 
