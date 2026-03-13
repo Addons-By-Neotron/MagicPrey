@@ -138,9 +138,7 @@ function mod:ScanForPreyWidget()
 		for _, widgetInfo in ipairs(widgets) do
 			if widgetInfo.widgetType == targetType then
 				preyWidgetID = widgetInfo.widgetID
-				if self.hasInfo then
-					self:info("Found prey widget %d in PowerBar set %d", widgetInfo.widgetID, setID)
-				end
+ 			    self:debug("Found prey widget %d in PowerBar set %d", widgetInfo.widgetID, setID)
 				return true
 			end
 		end
@@ -244,9 +242,7 @@ function mod:UpdatePreyState()
 		end
 		currentIcon = DEFAULT_ICON
 		currentIconCoords = DEFAULT_ICON_COORDS
-		if self.hasDebug then
-			self:debug("Out of zone: quest=%s zone=%s", tostring(currentQuestName), tostring(currentHuntZone))
-		end
+		self:debug("Out of zone: quest=%s zone=%s", tostring(currentQuestName), tostring(currentHuntZone))
 		self:UpdateDisplay()
 		return
 	end
