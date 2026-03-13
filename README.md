@@ -16,7 +16,7 @@ A World of Warcraft addon that provides a [LibDataBroker](https://www.wowace.com
 ## Requirements
 
 - An LDB display addon to show the data source (e.g., [Button Bin](https://www.curseforge.com/wow/addons/button-bin))
-- World of Warcraft: The War Within (12.0+)
+- Alternatively, use minimap only display.
 
 ## Configuration
 
