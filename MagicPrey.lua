@@ -26,7 +26,6 @@ local mod = LibStub("AceAddon-3.0"):NewAddon("MagicPrey", "AceEvent-3.0", "AceTi
 
 LibStub("LibLogger-1.0"):Embed(mod)
 
--- Upvalues
 local C_Map = C_Map
 local C_QuestLog = C_QuestLog
 local C_Spell = C_Spell
@@ -108,7 +107,7 @@ local currentIcon = DEFAULT_ICON
 local currentIconCoords = DEFAULT_ICON_COORDS
 
 -- LDB data object
-local dataobj = LDB:NewDataObject("Magic Prey", {
+local dataObj = LDB:NewDataObject("Magic Prey", {
 	type = "data source",
 	icon = DEFAULT_ICON,
 	iconCoords = DEFAULT_ICON_COORDS,
@@ -316,18 +315,18 @@ function mod:UpdateDisplay()
 	local stateText = GetStateText(currentState)
 	if stateText then
 		if currentState == "Away" and currentHuntZone then
-			dataobj.text = fmt("%s (%s)", stateText, currentHuntZone)
+			dataObj.text = fmt("%s (%s)", stateText, currentHuntZone)
 		else
-			dataobj.text = stateText
+			dataObj.text = stateText
 		end
-		dataobj.label = currentQuestName or L["Prey"]
-		dataobj.icon = currentIcon
-		dataobj.iconCoords = currentIconCoords
+		dataObj.label = currentQuestName or L["Prey"]
+		dataObj.icon = currentIcon
+		dataObj.iconCoords = currentIconCoords
 	else
-		dataobj.text = L["No Hunt"]
-		dataobj.label = L["Prey"]
-		dataobj.icon = DEFAULT_ICON
-		dataobj.iconCoords = DEFAULT_ICON_COORDS
+		dataObj.text = L["No Hunt"]
+		dataObj.label = L["Prey"]
+		dataObj.icon = DEFAULT_ICON
+		dataObj.iconCoords = DEFAULT_ICON_COORDS
 		currentIcon = DEFAULT_ICON
 		currentIconCoords = DEFAULT_ICON_COORDS
 	end
@@ -640,9 +639,9 @@ function mod:OnInitialize()
 	self.db.RegisterCallback(self, "OnProfileChanged", "ApplySettings")
 	self.db.RegisterCallback(self, "OnProfileCopied", "ApplySettings")
 	self.db.RegisterCallback(self, "OnProfileReset", "ApplySettings")
-	self:SetLogLevel(self.logLevels.DEBUG)
+--	self:SetLogLevel(self.logLevels.DEBUG)
 	if LDBIcon then
-		LDBIcon:Register("Magic Prey", dataobj, self.db.profile.minimapIcon)
+		LDBIcon:Register("Magic Prey", dataObj, self.db.profile.minimapIcon)
 	end
 
 	BuildOptions()
@@ -674,7 +673,7 @@ end
 function mod:UPDATE_UI_WIDGET(_, widgetInfo)
 	if not widgetInfo then return end
 	-- If it's our tracked widget, update
-	if preyWidgetID and widgetInfo.widgetID == preyWidgetID then
+	if widgetInfo.widgetID == preyWidgetID then
 		self:UpdatePreyState()
 	elseif widgetInfo.widgetType == Enum.UIWidgetVisualizationType.PreyHuntProgress then
 		-- Might be a new prey widget
@@ -699,7 +698,7 @@ function mod:QUEST_ACCEPTED(_, questID)
 end
 
 function mod:QUEST_REMOVED(_, questID)
-	if currentQuestID and currentQuestID == questID then
+	if currentQuestID == questID then
 		preyWidgetID = nil
 		currentQuestID = nil
 		currentQuestName = nil
