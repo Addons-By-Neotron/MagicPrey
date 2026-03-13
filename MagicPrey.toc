@@ -1,4 +1,5 @@
 ## Interface: 120001
+## X-Curse-Project-ID: 1485454
 ## Title: Magic Prey
 ## Notes: LDB data source for Prey Hunt tracking
 ## Author: NeoTron
