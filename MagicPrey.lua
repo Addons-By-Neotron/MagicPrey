@@ -23,7 +23,7 @@ local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 local AceConfigRegistry = LibStub("AceConfig-3.0")
 
 local mod = LibStub("AceAddon-3.0"):NewAddon("MagicPrey", "AceEvent-3.0", "AceTimer-3.0", "AceConsole-3.0", "LibMagicUtil-1.0")
-
+MagicPrey = mod
 LibStub("LibLogger-1.0"):Embed(mod)
 
 local C_Map = C_Map
@@ -193,6 +193,44 @@ end
 
 
 
+-- Scan zone-level world quests on the player's current continent for a "Prey: ..." quest.
+-- Returns the zone name string if found, nil otherwise.
+function mod:FindPreyWorldQuestZone()
+	if not (C_TaskQuest and C_TaskQuest.GetQuestsOnMap and C_TaskQuest.GetQuestZoneID) then return nil end
+
+	-- Walk up to continent level from player's position
+	local contMapID
+	local playerMap = C_Map.GetBestMapForUnit and C_Map.GetBestMapForUnit("player")
+	local cur = playerMap
+	while cur do
+		local info = C_Map.GetMapInfo(cur)
+		if not info then break end
+		if info.mapType == Enum.UIMapType.Continent then
+			contMapID = cur
+			break
+		end
+		cur = info.parentMapID
+	end
+	if not contMapID then return nil end
+
+	local zones = C_Map.GetMapChildrenInfo and C_Map.GetMapChildrenInfo(contMapID, Enum.UIMapType.Zone, true)
+	if not zones then return nil end
+
+	for _, zoneInfo in ipairs(zones) do
+		local quests = C_TaskQuest.GetQuestsOnMap(zoneInfo.mapID)
+		if quests then
+			for _, questInfo in ipairs(quests) do
+				local title = C_QuestLog.GetTitleForQuestID and C_QuestLog.GetTitleForQuestID(questInfo.questID)
+				if title and title:find("^Prey") then
+					self:debug("Found Prey world quest %d (%s) in zone %s", questInfo.questID, title, zoneInfo.name)
+					return zoneInfo.name
+				end
+			end
+		end
+	end
+	return nil
+end
+
 -- Update state from the prey widget
 function mod:UpdatePreyState()
 	-- Check for active prey quest
@@ -239,6 +277,10 @@ function mod:UpdatePreyState()
 		-- Load persisted per-character zone (cached while in hunt zone)
 		if not currentHuntZone and self.db and self.db.char.lastHuntQuestID == currentQuestID then
 			currentHuntZone = self.db.char.lastHuntZone
+		end
+		-- Detect zone by finding the companion "Prey: ..." world quest
+		if not currentHuntZone then
+			currentHuntZone = self:FindPreyWorldQuestZone()
 		end
 		currentIcon = DEFAULT_ICON
 		currentIconCoords = DEFAULT_ICON_COORDS
@@ -443,18 +485,32 @@ function mod:ApplyBlizzardTrackerVisibility()
 	if not frame then return end
 
 	if shouldHide then
-		frame:Hide()
-		frame:SetScript("OnShow", function(f)
-			if mod.db and mod.db.profile.hideBlizzardTracker then
-				f:Hide()
+		local container = UIWidgetPowerBarContainerFrame
+		-- Hide the prey frame and any sibling frames (e.g. glow overlays for Final state)
+		local toHide = { frame }
+		if container then
+			for _, child in ipairs({ container:GetChildren() }) do
+				if child ~= frame and child:IsShown() then
+					toHide[#toHide + 1] = child
+				end
 			end
-		end)
-		hiddenWidgetFrames[frame] = true
+		end
+		for _, f in ipairs(toHide) do
+			f:Hide()
+			f:SetScript("OnShow", function(self)
+				if mod.db and mod.db.profile.hideBlizzardTracker then
+					self:Hide()
+				end
+			end)
+			hiddenWidgetFrames[f] = true
+		end
 	else
 		if hiddenWidgetFrames[frame] then
-			frame:SetScript("OnShow", nil)
-			frame:Show()
-			hiddenWidgetFrames[frame] = nil
+			for f in pairs(hiddenWidgetFrames) do
+				f:SetScript("OnShow", nil)
+				f:Show()
+			end
+			hiddenWidgetFrames = {}
 		end
 	end
 end
@@ -635,7 +691,7 @@ function mod:OnInitialize()
 	self.db.RegisterCallback(self, "OnProfileChanged", "ApplySettings")
 	self.db.RegisterCallback(self, "OnProfileCopied", "ApplySettings")
 	self.db.RegisterCallback(self, "OnProfileReset", "ApplySettings")
---	self:SetLogLevel(self.logLevels.DEBUG)
+	-- self:SetLogLevel(self.logLevels.DEBUG)
 	if LDBIcon then
 		LDBIcon:Register("Magic Prey", dataObj, self.db.profile.minimapIcon)
 	end
@@ -706,7 +762,12 @@ function mod:QUEST_REMOVED(_, questID)
 		currentState = nil
 		tooltipText = nil
 		preyModifiers = {}
-		self:RestoreBlizzardTracker()
+		-- Clear OnShow scripts but don't force-show frames: Blizzard will hide the widget
+		-- naturally as the hunt ends. Force-showing caused a flash of the crystal on kill.
+		for frame in pairs(hiddenWidgetFrames) do
+			frame:SetScript("OnShow", nil)
+		end
+		hiddenWidgetFrames = {}
 		self:UpdateDisplay()
 	end
 end
