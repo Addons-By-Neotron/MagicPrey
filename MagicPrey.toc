@@ -1,4 +1,4 @@
-## Interface: 120100
+## Interface: 120100, 120105
 ## X-Curse-Project-ID: 1485454
 ## X-Wago-ID: aNDMwp6o
 ## Title: Magic Prey
